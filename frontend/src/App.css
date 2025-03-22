@@ -1,0 +1,120 @@
+/* FileComplaint.css */
+
+/* Background animation */
+.file-complaint-container {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)),
+    url("https://source.unsplash.com/1600x900/?room") no-repeat center center/cover;
+  animation: fadeIn 2s ease-in-out;
+}
+
+/* Dark overlay */
+.file-complaint-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Complaint form box */
+.file-complaint-form {
+  position: relative;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  max-width: 450px;
+  width: 100%;
+  animation: slideIn 0.8s ease-in-out;
+}
+
+/* Form title */
+.file-complaint-form h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+/* Input fields */
+.file-complaint-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.file-complaint-input:focus {
+  border-color: #007bff;
+}
+
+/* Error messages */
+.error-text {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+/* Submit button */
+.file-complaint-button {
+  width: 100%;
+  background: #007bff;
+  color: white;
+  font-size: 1rem;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.file-complaint-button:hover {
+  background: #0056b3;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 500px) {
+  .file-complaint-form {
+    padding: 1.5rem;
+  }
+
+  .file-complaint-form h2 {
+    font-size: 1.5rem;
+  }
+
+  .file-complaint-input {
+    font-size: 0.9rem;
+  }
+
+  .file-complaint-button {
+    font-size: 0.9rem;
+  }
+}
