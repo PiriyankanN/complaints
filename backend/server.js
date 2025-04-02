@@ -3,16 +3,16 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 
-// Load environment variables
+
 dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(express.json());
-app.use(cors({ origin: "*" })); // Adjust origin as needed for security
 
-// Database connection
+app.use(express.json());
+app.use(cors({ origin: "*" })); 
+
+
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
@@ -22,7 +22,7 @@ const connectDB = async () => {
     console.log("✅ MongoDB connected successfully");
   } catch (error) {
     console.error("❌ MongoDB connection error:", error);
-    process.exit(1); // Exit on failure
+    process.exit(1); 
   }
 };
 
@@ -38,10 +38,10 @@ const ComplaintSchema = new mongoose.Schema({
 
 const Complaint = mongoose.model("Complaint", ComplaintSchema);
 
-// Generate Unique Reference Number
+
 const generateRefNumber = () => "REF" + Math.floor(100000 + Math.random() * 900000);
 
-// API: Submit Complaint
+
 app.post("/api/complaints", async (req, res) => {
   const referenceNumber = generateRefNumber();
   const newComplaint = new Complaint({ ...req.body, referenceNumber });
@@ -54,7 +54,7 @@ app.post("/api/complaints", async (req, res) => {
   }
 });
 
-// API: Get Complaint Progress
+
 app.get("/api/complaints/:refNumber", async (req, res) => {
   try {
     const complaint = await Complaint.findOne({ referenceNumber: req.params.refNumber });
@@ -65,7 +65,7 @@ app.get("/api/complaints/:refNumber", async (req, res) => {
   }
 });
 
-// API: Get All Complaints
+
 app.get("/api/complaints", async (req, res) => {
   try {
     const complaints = await Complaint.find();
@@ -75,7 +75,7 @@ app.get("/api/complaints", async (req, res) => {
   }
 });
 
-// API: Update Complaint Status
+
 app.put("/api/complaints/:refNumber", async (req, res) => {
   try {
     const updatedComplaint = await Complaint.findOneAndUpdate(
@@ -90,5 +90,5 @@ app.put("/api/complaints/:refNumber", async (req, res) => {
   }
 });
 
-// Start Server
+
 app.listen(5000, () => console.log("Server running on port 5000"));
