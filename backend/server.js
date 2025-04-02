@@ -3,15 +3,12 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 
-
 dotenv.config();
 
 const app = express();
 
-
 app.use(express.json());
-app.use(cors({ origin: "*" })); 
-
+app.use(cors({ origin: "*" }));
 
 const connectDB = async () => {
   try {
@@ -19,10 +16,10 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("✅ MongoDB connected successfully");
+    console.log("MongoDB connected successfully");
   } catch (error) {
-    console.error("❌ MongoDB connection error:", error);
-    process.exit(1); 
+    console.error(" MongoDB connection error:", error);
+    process.exit(1);
   }
 };
 
@@ -33,13 +30,24 @@ const ComplaintSchema = new mongoose.Schema({
   email: String,
   complaint: String,
   referenceNumber: String,
-  status: { type: String, default: "Pending" }
+  status: { type: String, default: "Pending" },
+  createdAt: { type: Date, default: Date.now }
 });
 
 const Complaint = mongoose.model("Complaint", ComplaintSchema);
 
+const AdminComplaintSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  complaint: String,
+  referenceNumber: String,
+  status: { type: String, default: "Pending", enum: ["Pending", "In Progress", "Resolved"] },
+  createdAt: { type: Date, default: Date.now }
+});
 
-const generateRefNumber = () => "REF" + Math.floor(100000 + Math.random() * 900000);
+const AdminComplaint = mongoose.model("AdminComplaint", AdminComplaintSchema);
+
+const generateRefNumber = (prefix = "REF") => prefix + Math.floor(100000 + Math.random() * 900000);
 
 
 app.post("/api/complaints", async (req, res) => {
@@ -54,7 +62,6 @@ app.post("/api/complaints", async (req, res) => {
   }
 });
 
-
 app.get("/api/complaints/:refNumber", async (req, res) => {
   try {
     const complaint = await Complaint.findOne({ referenceNumber: req.params.refNumber });
@@ -65,16 +72,14 @@ app.get("/api/complaints/:refNumber", async (req, res) => {
   }
 });
 
-
 app.get("/api/complaints", async (req, res) => {
   try {
-    const complaints = await Complaint.find();
+    const complaints = await Complaint.find().sort({ createdAt: -1 });
     res.json(complaints);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 app.put("/api/complaints/:refNumber", async (req, res) => {
   try {
@@ -90,5 +95,71 @@ app.put("/api/complaints/:refNumber", async (req, res) => {
   }
 });
 
+app.delete("/api/complaints/:refNumber", async (req, res) => {
+  try {
+    const deletedComplaint = await Complaint.findOneAndDelete({ referenceNumber: req.params.refNumber });
+    if (!deletedComplaint) return res.status(404).json({ message: "Complaint not found" });
+    res.json({ message: "Complaint deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete complaint" });
+  }
+});
+
+app.post("/api/admincomplaints", async (req, res) => {
+  const referenceNumber = generateRefNumber("ADMIN-REF");
+  const newAdminComplaint = new AdminComplaint({ ...req.body, referenceNumber });
+
+  try {
+    await newAdminComplaint.save();
+    res.status(201).json({ message: "Admin complaint submitted!", referenceNumber });
+  } catch (error) {
+    res.status(500).json({ message: "Error submitting admin complaint" });
+  }
+});
+
+app.get("/api/admincomplaints", async (req, res) => {
+  try {
+    const adminComplaints = await AdminComplaint.find().sort({ createdAt: -1 });
+    res.json(adminComplaints);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get("/api/admincomplaints/:refNumber", async (req, res) => {
+  try {
+    const adminComplaint = await AdminComplaint.findOne({ referenceNumber: req.params.refNumber });
+    if (!adminComplaint) return res.status(404).json({ message: "Admin complaint not found" });
+    res.json(adminComplaint);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.put("/api/admincomplaints/:refNumber", async (req, res) => {
+  try {
+    const updatedAdminComplaint = await AdminComplaint.findOneAndUpdate(
+      { referenceNumber: req.params.refNumber },
+      { status: req.body.status },
+      { new: true }
+    );
+    if (!updatedAdminComplaint) return res.status(404).json({ message: "Admin complaint not found" });
+    res.json(updatedAdminComplaint);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.delete("/api/admincomplaints/:refNumber", async (req, res) => {
+  try {
+    const deletedAdminComplaint = await AdminComplaint.findOneAndDelete({ 
+      referenceNumber: req.params.refNumber 
+    });
+    if (!deletedAdminComplaint) return res.status(404).json({ message: "Admin complaint not found" });
+    res.json({ message: "Admin complaint deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete admin complaint" });
+  }
+});
 
 app.listen(5000, () => console.log("Server running on port 5000"));
