@@ -39,7 +39,7 @@ const ComplaintForm = () => {
       </div>
 
       <div style={{ flex: 2, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0, 0, 0, 0)", padding: "20px" }}>
-        <div style={{ width: "350px", padding: "20px", borderRadius: "10px", boxShadow: "25px 25px 50px rgb(0, 0, 0)", textAlign: "center", backgroundColor: "rgb(43, 86, 134)" }}>
+        <div style={{ width: "350px", padding: "20px", borderRadius: "10px", boxShadow: "25px 25px 50px rgb(0, 0, 0)", textAlign: "center", backgroundColor: "rgb(157, 194, 237)" }}>
           <h2 style={{ color: "white", fontWeight: "bold" }}>File a Complaint</h2>
 
           {submitted ? (
@@ -53,7 +53,7 @@ const ComplaintForm = () => {
 
               <p style={{ color: "green", fontWeight: "bold" }}>{message}</p>
 
-              <p><strong>Reference Number:</strong> {referenceNumber}</p>
+              <p><strong>Save this Reference Number to track status:</strong> {referenceNumber}</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>

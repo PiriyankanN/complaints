@@ -14,7 +14,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-
 router.get("/", async (req, res) => {
   try {
     const complaints = await Complaint.find();
@@ -24,7 +23,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-r
 router.put("/:referenceNumber", async (req, res) => {
   try {
     const { status } = req.body;

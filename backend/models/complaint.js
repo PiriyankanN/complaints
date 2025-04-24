@@ -9,7 +9,6 @@ const ComplaintSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-
 ComplaintSchema.pre('save', function(next) {
   if (!this.referenceNumber) {
     this.referenceNumber = 'REF-' + Math.random().toString(36).substr(2, 9).toUpperCase();
