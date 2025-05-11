@@ -10,6 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 
+// MongoDB connection
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
@@ -18,38 +19,48 @@ const connectDB = async () => {
     });
     console.log("MongoDB connected successfully");
   } catch (error) {
-    console.error(" MongoDB connection error:", error);
+    console.error("MongoDB connection error:", error);
     process.exit(1);
   }
 };
 
 connectDB();
 
+// Complaint Schema & Model
 const ComplaintSchema = new mongoose.Schema({
   name: String,
   email: String,
   complaint: String,
   referenceNumber: String,
   status: { type: String, default: "Pending" },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
-
 const Complaint = mongoose.model("Complaint", ComplaintSchema);
 
+// Admin Complaint Schema & Model
 const AdminComplaintSchema = new mongoose.Schema({
   name: String,
   email: String,
   complaint: String,
   referenceNumber: String,
   status: { type: String, default: "Pending", enum: ["Pending", "In Progress", "Resolved"] },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
-
 const AdminComplaint = mongoose.model("AdminComplaint", AdminComplaintSchema);
+
+// Feedback Schema & Model
+const FeedbackSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, trim: true },
+  rating: { type: Number, min: 1, max: 5, default: 5 },
+  message: { type: String, required: true, trim: true },
+  createdAt: { type: Date, default: Date.now },
+});
+const Feedback = mongoose.model("Feedback", FeedbackSchema);
 
 const generateRefNumber = (prefix = "REF") => prefix + Math.floor(100000 + Math.random() * 900000);
 
-
+// Complaint Routes
 app.post("/api/complaints", async (req, res) => {
   const referenceNumber = generateRefNumber();
   const newComplaint = new Complaint({ ...req.body, referenceNumber });
@@ -105,6 +116,7 @@ app.delete("/api/complaints/:refNumber", async (req, res) => {
   }
 });
 
+// Admin Complaint Routes
 app.post("/api/admincomplaints", async (req, res) => {
   const referenceNumber = generateRefNumber("ADMIN-REF");
   const newAdminComplaint = new AdminComplaint({ ...req.body, referenceNumber });
@@ -162,4 +174,43 @@ app.delete("/api/admincomplaints/:refNumber", async (req, res) => {
   }
 });
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+// Feedback Routes
+app.post("/api/feedback", async (req, res) => {
+  if (!req.body.name || !req.body.email || !req.body.message) {
+    return res.status(400).json({ message: "Missing required fields: name, email, message" });
+  }
+
+  const feedback = new Feedback(req.body);
+  try {
+    await feedback.save();
+    console.log('Feedback saved:', feedback);  // Log the saved feedback
+    res.status(201).json({ message: "Feedback submitted successfully" });
+  } catch (error) {
+    console.error("Error saving feedback:", error);
+    res.status(500).json({ error: "Failed to submit feedback" });
+  }
+});
+
+
+app.get("/api/feedbacks", async (req, res) => {
+  try {
+    const allFeedback = await Feedback.find().sort({ createdAt: -1 });
+    res.json(allFeedback);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch feedback data" });
+  }
+});
+
+// ✅ New feedbacks endpoint (plural)
+app.get("/api/feedback", async (req, res) => {
+  try {
+    const feedbacks = await Feedback.find().sort({ createdAt: -1 });
+    res.json(feedbacks);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch feedbacks" });
+  }
+});
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
